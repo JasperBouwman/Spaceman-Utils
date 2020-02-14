@@ -1,7 +1,7 @@
 /.idea
 /out
 *.iml
-
+*.gitattributes
 *.class
 
 # Mobile Tools for Java (J2ME)

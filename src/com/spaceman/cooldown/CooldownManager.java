@@ -1,5 +1,6 @@
-package com.spaceman;
+package com.spaceman.cooldown;
 
+import com.spaceman.Main;
 import com.spaceman.fileHander.Files;
 import com.spaceman.fileHander.GettingFiles;
 import org.bukkit.Bukkit;
@@ -12,9 +13,23 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 
+import static com.spaceman.colorFormatter.ColorTheme.sendErrorTheme;
+
 public enum CooldownManager {
-    COOLDOWN1,
-    COOLDOWN2;//todo edit
+    
+    /*
+    * This Cooldown Util uses the following utils:
+    * - Pre-made Main template
+    * - FileHandler
+    * - ColorTheme
+    *
+    * in your onEnable:
+    * CooldownManager.setDefaultValues();
+    * CooldownManager.loopCooldown = false; //to reset the loop catcher (for if there are any chances made)
+    * */
+    
+    COOLDOWN1("3000"),
+    COOLDOWN2("COOLDOWN1");//todo edit
     
     private static final String pluginName = Main.getInstance().getDescription().getName();
     private static final String permissionRoot = pluginName;
@@ -23,9 +38,23 @@ public enum CooldownManager {
     private static HashMap<UUID, HashMap<CooldownManager, Long>> cooldownTime = new HashMap<>();
     private static Files configFile = GettingFiles.getFile(/*fixme -> config name*/"config");
     
+    private String defaultValue;
+    
+    CooldownManager(String defValue) {
+        this.defaultValue = defValue;
+    }
+    
+    public static void setDefaultValues() {
+        for (CooldownManager cooldown : CooldownManager.values()) {
+            if (!configFile.getConfig().contains("cooldown." + cooldown.name())) {
+                cooldown.edit(cooldown.defaultValue);
+            }
+        }
+    }
+    
     public static boolean contains(String name) {
         for (CooldownManager cooldown : CooldownManager.values()) {
-            if (name.equals(cooldown.name())) {
+            if (cooldown.name().equals(name)) {
                 return true;
             }
         }
@@ -55,7 +84,6 @@ public enum CooldownManager {
         timeMap.put(this, System.currentTimeMillis());
         cooldownTime.put(player.getUniqueId(), timeMap);
     }
-    
     
     private long getTime(Player player, List<String> prev) {
         if (prev.contains(this.name()) || loopCooldown) {
@@ -103,4 +131,17 @@ public enum CooldownManager {
         return getTime(player, new ArrayList<>());
     }
     
+    public boolean hasCooled(Player player) {
+        return hasCooled(player, true);
+    }
+    
+    public boolean hasCooled(Player player, boolean sendMessage) {
+        long cooldown = this.getTime(player);
+        if (cooldown / 1000 > 0) {
+            if (sendMessage) sendErrorTheme(player, "You must wait another %s to use this again",
+                    (cooldown / 1000) + " second" + ((cooldown / 1000) == 1 ? "" : "s"));
+            return false;
+        }
+        return true;
+    }
 }

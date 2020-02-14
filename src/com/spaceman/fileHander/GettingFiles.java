@@ -1,8 +1,5 @@
 package com.spaceman.fileHander;
 
-import com.spaceman.Main;
-import org.bukkit.plugin.java.JavaPlugin;
-
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -14,8 +11,7 @@ public class GettingFiles {
         
         list = new HashMap<>();
         
-        JavaPlugin main = Main.getInstance();
-        list.put("FileName", new Files("FileName.yml"));
+        list.put("FileName", new Files("FileName.yml"));//todo add files here
     }
     
     public static Files getFile(String file) {
